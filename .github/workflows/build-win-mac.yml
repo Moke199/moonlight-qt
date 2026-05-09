@@ -24,6 +24,9 @@ jobs:
           # macOS
           - os: macos-15
             qt_version: 6.11.0
+          # macOS x86
+          - os: macos-13          # ← 也可以用 macos-14
+            qt_version: 6.11.0
 
     runs-on: ${{ matrix.os }}
 
@@ -108,9 +111,19 @@ jobs:
           path: build/deploy-arm64-release/*
           if-no-files-found: error
 
-      - name: Upload Binaries (macOS)
+      - name: Upload Binaries (macOS x64)
         uses: actions/upload-artifact@v6
-        if: runner.os == 'macOS'
+        if: runner.os == 'macOS' && runner.arch == 'X64'
+        with:
+          name: Moonlight-macOS-x64-${{ env.CI_VERSION }}
+          path: build/installer-Release/*.dmg
+          compression-level: 0
+          if-no-files-found: error
+
+    
+      - name: Upload Binaries (macOS arm64)
+        uses: actions/upload-artifact@v6
+        if: runner.os == 'macOS' && runner.arch == 'ARM64'
         with:
           name: Moonlight-${{ runner.os }}-${{ env.CI_VERSION }}
           path: build/installer-Release/*.dmg
