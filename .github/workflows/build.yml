@@ -157,7 +157,7 @@ jobs:
         path: build/installer-Release/MoonlightSetup-*.exe
 
   build-macos:
-    runs-on: macos-15
+    runs-on: macos-13
     
     steps:
     - name: Checkout code
