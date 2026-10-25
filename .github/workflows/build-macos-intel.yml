@@ -1,0 +1,53 @@
+name: Build macOS Intel (x86_64)
+
+on:
+  workflow_dispatch: # 允许你手动在 Actions 页面点击触发
+  # push:            # 如果你想每次 push 都构建，可以取消注释这行
+  #   branches: [ main ]
+
+jobs:
+  build-intel:
+    # 使用 ARM64 的 macos-15 runner 来交叉编译 x86_64
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          fetch-depth: 0
+
+      - name: Install create-dmg
+        run: |
+          brew install node
+          npm install --global create-dmg
+
+      # 关键步骤：强制安装 x86_64 架构的 Qt
+      - name: Install Qt (x86_64)
+        uses: jurplel/install-qt-action@v4
+        with:
+          cache: true
+          set-env: true
+          add-tools-to-path: true
+          version: '6.11.0' # 与仓库 CI 保持一致的版本
+          arch: 'clang_64'   # 在 macOS 上，clang_64 对应 x86_64 架构
+          modules: 'qtimageformats'
+          aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@073e34d7c2ab4ae6961ed7cca690b3abd5ba5a7e'
+
+      # 安装仓库要求的预构建依赖
+      - name: Setup Dependencies
+        run: python3 setup-deps.py
+
+      # 执行构建和打包
+      # generate-dmg.sh 会自动使用环境中的 Qt 和编译器
+      # 因为上一步安装的 Qt 是 x86_64 的，最终产物也会是 x86_64
+      - name: Build and Package DMG
+        run: |
+          bash scripts/generate-dmg.sh Release
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@v6
+        with:
+          name: Moonlight-VPlus-macOS-x86_64
+          path: build/installer-Release/*.dmg
+          if-no-files-found: error
