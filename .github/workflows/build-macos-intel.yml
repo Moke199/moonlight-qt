@@ -31,7 +31,7 @@ jobs:
           add-tools-to-path: true
           version: '6.11.0' # 与仓库 CI 保持一致的版本
           arch: 'clang_64'   # 在 macOS 上，clang_64 对应 x86_64 架构
-          modules: 'qtimageformats'
+          modules: 'qtimageformats qtmultimedia'
           aqtsource: 'git+https://github.com/miurahr/aqtinstall.git@073e34d7c2ab4ae6961ed7cca690b3abd5ba5a7e'
 
       # 安装仓库要求的预构建依赖
